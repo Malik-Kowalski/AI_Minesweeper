@@ -12,7 +12,7 @@ class Minesweeper:
         self.revealed = [[False for _ in range(cols)] for _ in range(rows)]
         self.flags = [[False for _ in range(cols)] for _ in range(rows)]
         self._place_mines()
-        self._calculate_numbers() 
+        self._calculate_numbers()
 
     def _place_mines(self):
         placed_mines = 0
@@ -31,6 +31,8 @@ class Minesweeper:
             return "game_over"
         elif self.board[row][col] == 0:
             self._reveal_neighbors(row, col)
+        if self.check_win():
+            return "win"
         return "safe"
 
     def flag(self, row, col):
@@ -42,6 +44,13 @@ class Minesweeper:
             for c in range(col - 1, col + 2):
                 if 0 <= r < self.rows and 0 <= c < self.cols and not self.revealed[r][c]:
                     self.reveal(r, c)
+
+    def check_win(self):
+        for row in range(self.rows):
+            for col in range(self.cols):
+                if self.board[row][col] != -1 and not self.revealed[row][col]:
+                    return False
+        return True
 
     def _calculate_numbers(self):
         for row in range(self.rows):
@@ -62,7 +71,6 @@ class MinesweeperGUI(QMainWindow):
         self.initUI()
 
     def initUI(self):
-        """Inicjalizacja GUI."""
         self.setWindowTitle("Minesweeper")
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
@@ -73,6 +81,7 @@ class MinesweeperGUI(QMainWindow):
             for col in range(self.game.cols):
                 button = QPushButton(" ")
                 button.setFixedSize(30, 30)
+                button.setStyleSheet("background-color: gray;")
                 button.clicked.connect(lambda _, r=row, c=col: self.on_click(r, c))
                 button.setContextMenuPolicy(Qt.CustomContextMenu)
                 button.customContextMenuRequested.connect(lambda _, r=row, c=col: self.on_right_click(r, c))
@@ -83,6 +92,8 @@ class MinesweeperGUI(QMainWindow):
         result = self.game.reveal(row, col)
         if result == "game_over":
             self.show_game_over()
+        elif result == "win":
+            self.show_win_message()
         else:
             self.update_board()
 
@@ -96,19 +107,24 @@ class MinesweeperGUI(QMainWindow):
                 button = self.buttons[(row, col)]
                 if self.game.flags[row][col]:
                     button.setText("F")
-                    button.setStyleSheet("color: red;")
+                    button.setStyleSheet("color: red; background-color: gray;")
                 elif self.game.revealed[row][col]:
                     if self.game.board[row][col] == -1:
                         button.setText("*")
-                        button.setStyleSheet("color: black;")
+                        button.setStyleSheet("color: black; background-color: darkgray;")
                     else:
                         button.setText(str(self.game.board[row][col]) if self.game.board[row][col] > 0 else " ")
-                        button.setStyleSheet("color: blue;")
+                        button.setStyleSheet("color: blue; background-color: darkgray;")
                 else:
                     button.setText(" ")
+                    button.setStyleSheet("background-color: gray;")
 
     def show_game_over(self):
         QMessageBox.critical(self, "Game Over", "You hit a mine! Game Over.")
+        self.close()
+
+    def show_win_message(self):
+        QMessageBox.information(self, "Congratulations!", "You've won the game!")
         self.close()
 
 if __name__ == '__main__':
