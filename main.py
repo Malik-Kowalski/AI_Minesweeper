@@ -1,73 +1,14 @@
 import sys
-import random
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QMessageBox, QGridLayout, QWidget
-from PyQt5.QtCore import Qt
-
-class Minesweeper:
-    def __init__(self, rows, cols, mines):
-        self.rows = rows
-        self.cols = cols
-        self.mines = mines
-        self.board = [[0 for _ in range(cols)] for _ in range(rows)]
-        self.revealed = [[False for _ in range(cols)] for _ in range(rows)]
-        self.flags = [[False for _ in range(cols)] for _ in range(rows)]
-        self._place_mines()
-        self._calculate_numbers()
-
-    def _place_mines(self):
-        placed_mines = 0
-        while placed_mines < self.mines:
-            row = random.randint(0, self.rows - 1)
-            col = random.randint(0, self.cols - 1)
-            if self.board[row][col] == 0:
-                self.board[row][col] = -1
-                placed_mines += 1
-
-    def reveal(self, row, col):
-        if self.revealed[row][col] or self.flags[row][col]:
-            return
-        self.revealed[row][col] = True
-        if self.board[row][col] == -1:
-            return "game_over"
-        elif self.board[row][col] == 0:
-            self._reveal_neighbors(row, col)
-        if self.check_win():
-            return "win"
-        return "safe"
-
-    def flag(self, row, col):
-        if not self.revealed[row][col]:
-            self.flags[row][col] = not self.flags[row][col]
-
-    def _reveal_neighbors(self, row, col):
-        for r in range(row - 1, row + 2):
-            for c in range(col - 1, col + 2):
-                if 0 <= r < self.rows and 0 <= c < self.cols and not self.revealed[r][c]:
-                    self.reveal(r, c)
-
-    def check_win(self):
-        for row in range(self.rows):
-            for col in range(self.cols):
-                if self.board[row][col] != -1 and not self.revealed[row][col]:
-                    return False
-        return True
-
-    def _calculate_numbers(self):
-        for row in range(self.rows):
-            for col in range(self.cols):
-                if self.board[row][col] == -1:
-                    continue
-                mine_count = 0
-                for r in range(row - 1, row + 2):
-                    for c in range(col - 1, col + 2):
-                        if 0 <= r < self.rows and 0 <= c < self.cols and self.board[r][c] == -1:
-                            mine_count += 1
-                self.board[row][col] = mine_count
+from PyQt5.QtCore import Qt, QTimer
+from minesweeper import Minesweeper
+from ai_player import AIPlayer
 
 class MinesweeperGUI(QMainWindow):
-    def __init__(self, game):
+    def __init__(self, game, ai_player):
         super().__init__()
         self.game = game
+        self.ai_player = ai_player
         self.initUI()
 
     def initUI(self):
@@ -87,6 +28,10 @@ class MinesweeperGUI(QMainWindow):
                 button.customContextMenuRequested.connect(lambda _, r=row, c=col: self.on_right_click(r, c))
                 self.grid.addWidget(button, row, col)
                 self.buttons[(row, col)] = button
+
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.play_ai_move)
+        self.timer.start(1000)
 
     def on_click(self, row, col):
         result = self.game.reveal(row, col)
@@ -127,10 +72,21 @@ class MinesweeperGUI(QMainWindow):
         QMessageBox.information(self, "Congratulations!", "You've won the game!")
         self.close()
 
+    def play_ai_move(self):
+        safe_move = self.ai_player.make_move()
+        if safe_move:
+            row, col = safe_move
+            print(f"AI wykonuje ruch: ({row}, {col})")
+            self.on_click(row, col)
+        else:
+            print("AI nie ma dostępnych ruchów.")
+            self.timer.stop()
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     rows, cols, mines = 8, 8, 10
     game = Minesweeper(rows, cols, mines)
-    gui = MinesweeperGUI(game)
+    ai_player = AIPlayer(game)
+    gui = MinesweeperGUI(game, ai_player)
     gui.show()
     sys.exit(app.exec_())
