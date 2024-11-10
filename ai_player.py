@@ -8,14 +8,20 @@ class AIPlayer:
         self.neighbour_deduction = NeighbourDeduction(game)
 
     def make_move(self):
-        safe_move = self.neighbour_deduction.find_safe_move()
-        if safe_move:
-            print("AI znalazło bezpieczny ruch")
-            return safe_move
 
-        print("Brak bezpiecznego ruchu, AI wykonuje losowy ruch.")
+        move = self.neighbour_deduction.find_move()
+        if move:
+            action, row, col = move
+            print(f"AI znalazło ruch: {action} na ({row}, {col})")
+            return (action, row, col)
+
+        print("AI nie znalazło bezpiecznego ruchu, wykonuje losowy ruch.")
         random_move = self.get_random_move()
-        return random_move
+        if random_move:
+            row, col = random_move
+            print(f"AI wykonuje losowy ruch na ({row}, {col})")
+            return ('reveal', row, col)
+        return None
 
     def get_random_move(self):
         available_moves = []

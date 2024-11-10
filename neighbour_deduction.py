@@ -2,19 +2,32 @@ class NeighbourDeduction:
     def __init__(self, game):
         self.game = game
 
-    def find_safe_move(self):
+    def find_move(self):
+
         for row in range(self.game.rows):
             for col in range(self.game.cols):
-                if self.game.revealed[row][col]:
+                if not self.game.revealed[row][col]:
                     continue
-                if self.is_safe(row, col):
-                    return (row, col)
+
+                mine_count = self.game.board[row][col]
+                neighbours = self.get_neighbours(row, col)
+
+                hidden_neighbours = [n for n in neighbours if not self.game.revealed[n[0]][n[1]]]
+                flagged_neighbours = [n for n in neighbours if self.game.flags[n[0]][n[1]]]
+
+                if len(flagged_neighbours) == mine_count:
+                    for n in hidden_neighbours:
+                        return ('reveal', n[0], n[1])
+
+                remaining_mines = mine_count - len(flagged_neighbours)
+                if remaining_mines > 0 and len(hidden_neighbours) == remaining_mines:
+                    for n in hidden_neighbours:
+                        return ('flag', n[0], n[1])
+
         return None
 
-    def is_safe(self, row, col):
-        return self.game.board[row][col] == 0
-
     def get_neighbours(self, row, col):
+
         neighbours = []
         for r in range(row - 1, row + 2):
             for c in range(col - 1, col + 2):
@@ -24,4 +37,5 @@ class NeighbourDeduction:
         return neighbours
 
     def is_valid(self, row, col):
+
         return 0 <= row < self.game.rows and 0 <= col < self.game.cols
