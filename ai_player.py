@@ -12,14 +12,13 @@ class AIPlayer:
         move = self.neighbour_deduction.find_move()
         if move:
             action, row, col = move
-            print(f"AI znalazło ruch: {action} na ({row}, {col})")
+            print("AI znalazło ruch dedukcyjny" )
             return (action, row, col)
 
         print("AI nie znalazło bezpiecznego ruchu, wykonuje losowy ruch.")
         random_move = self.get_random_move()
         if random_move:
             row, col = random_move
-            print(f"AI wykonuje losowy ruch na ({row}, {col})")
             return ('reveal', row, col)
         return None
 
