@@ -3,13 +3,17 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QMessageBox,
 from PyQt5.QtCore import Qt, QTimer
 from minesweeper import Minesweeper
 from ai_player import AIPlayer
+from GameLogger import GameLogger
 
 class MinesweeperGUI(QMainWindow):
     def __init__(self, game, ai_player):
         super().__init__()
         self.game = game
         self.ai_player = ai_player
+        self.logger = GameLogger("game_log.csv")
+        self.logger.start_new_game()
         self.initUI()
+
 
     def initUI(self):
         self.setWindowTitle("Minesweeper")
@@ -35,9 +39,8 @@ class MinesweeperGUI(QMainWindow):
 
     def on_click(self, row, col):
         try:
-            print(f"Kliknięto pole ({row}, {col})")
             result = self.game.reveal(row, col)
-            print(f"Wynik odkrycia: {result}")
+            self.logger.log_move("reveal", row, col, result, self.game)
             if result == "game_over":
                 self.show_game_over()
             elif result == "win":
@@ -49,8 +52,8 @@ class MinesweeperGUI(QMainWindow):
 
     def on_right_click(self, row, col):
         try:
-            print(f"Prawy klik na polu ({row}, {col})")
             self.game.flag(row, col)
+            self.logger.log_move("flag", row, col, "AI_flagged", self.game)
             self.update_board()
         except Exception as e:
             print(f"Error in on_right_click: {e}")
@@ -94,16 +97,17 @@ class MinesweeperGUI(QMainWindow):
             if move:
                 action, row, col = move
                 if action == 'reveal':
-                    print(f"AI wykonuje ruch odkrywania na ({row}, {col})")
+                    print(f"AI odkrywa:{row}, {col}")
                     self.on_click(row, col)
                 elif action == 'flag':
-                    print(f"AI flaguje pole na ({row}, {col})")
+                    print(f"AI flaguje:{row}, {col}")
                     self.on_right_click(row, col)
             else:
                 print("AI nie ma dostępnych ruchów.")
                 self.timer.stop()
         except Exception as e:
             print(f"Error in play_ai_move: {e}")
+
 
 if __name__ == '__main__':
     try:

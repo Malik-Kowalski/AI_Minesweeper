@@ -1,7 +1,6 @@
 import random
 from neighbour_deduction import NeighbourDeduction
 
-
 class AIPlayer:
     def __init__(self, game):
         self.game = game
