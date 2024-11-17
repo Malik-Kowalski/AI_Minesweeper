@@ -1,23 +1,31 @@
 import random
 from neighbour_deduction import NeighbourDeduction
+from cluster_inference import ClusterInference
 
 class AIPlayer:
     def __init__(self, game):
         self.game = game
         self.neighbour_deduction = NeighbourDeduction(game)
+        self.cluster_inference = ClusterInference(game)
 
     def make_move(self):
-
         move = self.neighbour_deduction.find_move()
         if move:
             action, row, col = move
-            print("AI znalazło ruch dedukcyjny" )
+            print("AI znalazło ruch dedukcyjny (Neighbour Deduction).")
+            return (action, row, col)
+
+        move = self.cluster_inference.analyze_clusters()
+        if move:
+            action, row, col = move
+            print("AI znalazło ruch dedukcyjny (Cluster Inference).")
             return (action, row, col)
 
         print("AI nie znalazło bezpiecznego ruchu, wykonuje losowy ruch.")
         random_move = self.get_random_move()
         if random_move:
             row, col = random_move
+            print(f"AI wykonuje losowy ruch na ({row}, {col}).")
             return ('reveal', row, col)
         return None
 
