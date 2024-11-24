@@ -10,7 +10,7 @@ class BayesianInference:
         self.game = game
         self.log_file = log_file
         self.model_file = model_file
-        self.model = GaussianNB()  # Używamy Gaussian Naive Bayes
+        self.model = GaussianNB()
         self.train_data = None
         self.train_labels = None
         self.trained = False
@@ -36,30 +36,27 @@ class BayesianInference:
                         adjacent = eval(row['Adjacent3x3'])
                         flattened = []
 
-                        # Spłaszczamy 3x3 do jednego wektora
                         for row_data in adjacent:
                             for value in row_data:
                                 if value is None:
-                                    flattened.append(-1)  # None zamieniamy na -1
+                                    flattened.append(-1)
                                 elif value == 'F':
-                                    flattened.append(-2)  # Flaga 'F' zamieniamy na -2
+                                    flattened.append(-2)
                                 else:
                                     try:
-                                        flattened.append(float(value))  # Próbujemy przekonwertować na float
+                                        flattened.append(float(value))
                                     except ValueError:
-                                        flattened.append(0)  # Jeśli nie da się przekonwertować, ustawiamy 0
+                                        flattened.append(0)
 
                         self.train_data.append(flattened)
                         self.train_labels.append(label)
 
                 if self.train_data:
-                    # Spłaszczamy dane do postaci 2D: (liczba_próbek, liczba_cech)
                     self.train_data = np.array(self.train_data)
                     self.train_labels = np.array(self.train_labels)
 
     def train_model(self):
         try:
-            # Sprawdź, czy dane zawierają NaN lub inf
             if np.any(np.isnan(self.train_data)) or np.any(np.isnan(self.train_labels)):
                 print("Dane zawierają NaN!")
                 return
@@ -67,7 +64,6 @@ class BayesianInference:
                 print("Dane zawierają inf!")
                 return
 
-            # Upewnij się, że dane są prawidłowe
             print(f"Rozpoczynam trenowanie modelu z danymi: {self.train_data.shape} i etykietami: {self.train_labels.shape}")
             self.model.fit(self.train_data, self.train_labels)
             print("Model wytrenowany pomyślnie.")
@@ -112,11 +108,10 @@ class BayesianInference:
         return adjacent_3x3
 
     def predict(self, adjacent_3x3):
-        # Upewniamy się, że dane są odpowiednio przetworzone
         flattened = [item if item is not None else -1 for sublist in adjacent_3x3 for item in sublist]
         if len(flattened) != self.model.n_features_in_:
             print(f"Nieprawidłowy rozmiar danych wejściowych: {len(flattened)} != {self.model.n_features_in_}")
-            return 0, 0  # Zwracamy wartości domyślne w przypadku problemu
+            return 0, 0
         probability = self.model.predict_proba([flattened])[0]
         prediction = self.model.predict([flattened])[0]
         return prediction, probability[1]
