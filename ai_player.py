@@ -1,12 +1,15 @@
 import random
 from neighbour_deduction import NeighbourDeduction
 from cluster_inference import ClusterInference
+from Bayesian_Inference import BayesianInference
+
 
 class AIPlayer:
     def __init__(self, game):
         self.game = game
         self.neighbour_deduction = NeighbourDeduction(game)
         self.cluster_inference = ClusterInference(game)
+        self.bayesian_inference = BayesianInference(game)
         self.current_algorithm = None
 
     def make_move(self):
@@ -21,7 +24,14 @@ class AIPlayer:
         if move:
             self.current_algorithm = "Cluster Inference"
             action, row, col = move
-            print(f"AI znalazło ruch dedukcyjny ({self.current_algorithm}).")
+            print(f"AI znalazło ruch klastrowy ({self.current_algorithm}).")
+            return action, row, col
+
+        move = self.bayesian_inference.find_flag()
+        if move:
+            self.current_algorithm = "Bayesian Inference"
+            action, row, col = move
+            print(f"AI znalazło oznaczenie miny ({self.current_algorithm}).")
             return action, row, col
 
         print("AI nie znalazło bezpiecznego ruchu, wykonuje losowy ruch.")

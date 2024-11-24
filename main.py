@@ -96,7 +96,7 @@ class MinesweeperGUI(QMainWindow):
         self.algorithms = {
             "Neighbour Deduction": QLabel("Neighbour Deduction"),
             "Cluster Inference": QLabel("Cluster Inference"),
-            "Bayesian": QLabel("Bayesian"),
+            "Bayesian Inference": QLabel("Bayesian Inference"),
             "Monte Carlo": QLabel("Monte Carlo")
         }
         for label in self.algorithms.values():
