@@ -47,7 +47,8 @@ class ClusterInference:
         return 0 <= row < self.game.rows and 0 <= col < self.game.cols
 
     def analyze_clusters(self):
-
+        if not any(self.game.revealed[row][col] for row in range(self.game.rows) for col in range(self.game.cols)):
+            return None
         clusters = self.find_clusters()
         for cluster in clusters:
             for cell in cluster:
