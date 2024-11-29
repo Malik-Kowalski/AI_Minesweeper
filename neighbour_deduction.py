@@ -19,12 +19,6 @@ class NeighbourDeduction:
                         if not self.game.flags[n[0]][n[1]]:
                             return ('reveal', n[0], n[1])
 
-                remaining_mines = mine_count - len(flagged_neighbours)
-                if remaining_mines > 0 and len(hidden_neighbours) == remaining_mines:
-                    for n in hidden_neighbours:
-                        if not self.game.flags[n[0]][n[1]]:
-                            return ('flag', n[0], n[1])
-
         return None
 
     def get_neighbours(self, row, col):
