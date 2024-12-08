@@ -1,5 +1,7 @@
 import pandas as pd
 import os
+from openpyxl import load_workbook
+
 
 class GameResultsLogger:
     def __init__(self, filename="game_results.xlsx"):
@@ -12,13 +14,10 @@ class GameResultsLogger:
             'TotalMoves': 0,
             'NeighbourDeductionMoves': 0,
             'ClusterInferenceMoves': 0,
-            'BayesianMoves': 0,
+            'RandomForestMoves': 0,
             'MonteCarloMoves': 0,
-            'NeighbourDeductionPercentage': 0.0,
-            'ClusterInferencePercentage': 0.0,
-            'BayesianPercentage': 0.0,
-            'MonteCarloPercentage': 0.0,
-            'Result': None
+            'Result': None,
+            'LastAlgorithm': None
         }
         self.ensure_file_exists()
 
@@ -27,9 +26,11 @@ class GameResultsLogger:
             columns = [
                 'GameID', 'Mines', 'BoardSize', 'TotalMoves',
                 'NeighbourDeductionMoves', 'ClusterInferenceMoves',
-                'BayesianMoves', 'MonteCarloMoves',
+                'RandomForestMoves', 'MonteCarloMoves',
                 'NeighbourDeductionPercentage', 'ClusterInferencePercentage',
-                'BayesianPercentage', 'MonteCarloPercentage', 'Result'
+                'RandomForestPercentage', 'MonteCarloPercentage', 'Result', 'LastAlgorithm',
+                'Wins', 'Losses', 'NeighbourDeductionPercentage', 'ClusterInferencePercentage',
+                'RandomForestPercentage', 'MonteCarloPercentage'
             ]
             df = pd.DataFrame(columns=columns)
             try:
@@ -46,12 +47,13 @@ class GameResultsLogger:
 
     def log_move(self, algorithm):
         self.results['TotalMoves'] += 1
+        self.results['LastAlgorithm'] = algorithm
         if algorithm == "Neighbour Deduction":
             self.results['NeighbourDeductionMoves'] += 1
         elif algorithm == "Cluster Inference":
             self.results['ClusterInferenceMoves'] += 1
-        elif algorithm == "Bayesian":
-            self.results['BayesianMoves'] += 1
+        elif algorithm == "Random Forest":
+            self.results['RandomForestMoves'] += 1
         elif algorithm == "Monte Carlo":
             self.results['MonteCarloMoves'] += 1
 
@@ -60,7 +62,7 @@ class GameResultsLogger:
         if self.results['TotalMoves'] > 0:
             self.results['NeighbourDeductionPercentage'] = (self.results['NeighbourDeductionMoves'] / self.results['TotalMoves']) * 100
             self.results['ClusterInferencePercentage'] = (self.results['ClusterInferenceMoves'] / self.results['TotalMoves']) * 100
-            self.results['BayesianPercentage'] = (self.results['BayesianMoves'] / self.results['TotalMoves']) * 100
+            self.results['RandomForestPercentage'] = (self.results['RandomForestMoves'] / self.results['TotalMoves']) * 100
             self.results['MonteCarloPercentage'] = (self.results['MonteCarloMoves'] / self.results['TotalMoves']) * 100
 
         self.save_results()
@@ -74,12 +76,33 @@ class GameResultsLogger:
 
             new_data = pd.DataFrame([self.results])
 
-            existing_data = existing_data.dropna(axis=1, how='all')
-            new_data = new_data.dropna(axis=1, how='all')
-
             updated_data = pd.concat([existing_data, new_data], ignore_index=True)
 
             updated_data.to_excel(self.filename, index=False, engine='openpyxl')
+
+            self.add_excel_formulas()
+
             print(f"Wyniki zapisane do {self.filename}")
         except Exception as e:
             print(f"Błąd podczas zapisywania wyników do Excela: {e}")
+
+    def add_excel_formulas(self):
+        try:
+            wb = load_workbook(self.filename)
+            ws = wb.active
+
+            ws['O2'] = '=COUNTIF(M:M,"win")'
+            ws['P2'] = '=COUNTIF(M:M,"loss")'
+            ws['Q2'] = '=AVERAGE(I:I)'
+            ws['R2'] = '=AVERAGE(J:J)'
+            ws['S2'] = '=AVERAGE(K:K)'
+            ws['T2'] = '=AVERAGE(L:L)'
+
+            wb.save(self.filename)
+            print("Formuły zostały dodane do pliku Excel.")
+        except Exception as e:
+            print(f"Błąd podczas dodawania formuł do Excela: {e}")
+
+
+logger = GameResultsLogger()
+
