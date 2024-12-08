@@ -1,7 +1,7 @@
 import random
 from neighbour_deduction import NeighbourDeduction
 from cluster_inference import ClusterInference
-from Bayesian_Flagging import Bayesian
+from Random_Forest_Flagging import Random_Forest
 from monte_carlo_analyzer import MonteCarloAnalyzer
 
 class AIPlayer:
@@ -9,7 +9,7 @@ class AIPlayer:
         self.game = game
         self.neighbour_deduction = NeighbourDeduction(game)
         self.cluster_inference = ClusterInference(game)
-        self.bayesian_flagging = Bayesian(game)
+        self.Random_Forest_flagging = Random_Forest(game)
         self.monte_carlo_analyzer = MonteCarloAnalyzer(game)
         self.current_algorithm = None
 
@@ -29,9 +29,9 @@ class AIPlayer:
             print(f"AI znalazło ruch klastrowy ({self.current_algorithm}).")
             return action, row, col
 
-        move = self.bayesian_flagging.find_flag()
+        move = self.Random_Forest_flagging.find_flag()
         if move:
-            self.current_algorithm = "Bayesian"
+            self.current_algorithm = "Random Forest"
             row, col, prob = move
             print(f"AI przewiduje pole ({row}, {col}) jako minę z prawdopodobieństwem {prob:.2f}.")
             return 'flag', row, col

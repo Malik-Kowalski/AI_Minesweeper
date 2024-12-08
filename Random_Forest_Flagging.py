@@ -6,7 +6,7 @@ import pickle
 from collections import Counter
 
 
-class Bayesian:
+class Random_Forest:
     def __init__(self, game, model_path="model.pkl", data_path='game_log.csv'):
         self.game = game
         self.model_path = model_path

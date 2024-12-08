@@ -100,7 +100,7 @@ class MinesweeperGUI(QMainWindow):
         self.algorithms = {
             "Neighbour Deduction": QLabel("Neighbour Deduction"),
             "Cluster Inference": QLabel("Cluster Inference"),
-            "Bayesian ": QLabel("Bayesian"),
+            "Random Forest": QLabel("Random Forest"),
             "Monte Carlo": QLabel("Monte Carlo")
         }
         for label in self.algorithms.values():
@@ -233,7 +233,8 @@ class MinesweeperGUI(QMainWindow):
             if move:
                 action, row, col = move
                 algorithm = self.ai_player.get_current_algorithm()
-                self.results_logger.log_move(algorithm)  # Logowanie ruchu algorytmu
+                self.update_algorithm_status(algorithm)
+                self.results_logger.log_move(algorithm)
                 if action == 'reveal':
                     print(f"AI odkrywa: ({row}, {col})")
                     self.on_click(row, col)
