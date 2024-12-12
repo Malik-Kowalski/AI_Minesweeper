@@ -14,7 +14,7 @@ class NeighbourDeduction:
                 hidden_neighbours = [n for n in neighbours if not self.game.revealed[n[0]][n[1]]]
                 flagged_neighbours = [n for n in neighbours if self.game.flags[n[0]][n[1]]]
 
-                if len(flagged_neighbours) == mine_count:
+                if len(flagged_neighbours) == mine_count and len(hidden_neighbours) > 0:
                     for n in hidden_neighbours:
                         if not self.game.flags[n[0]][n[1]]:
                             return ('reveal', n[0], n[1])
