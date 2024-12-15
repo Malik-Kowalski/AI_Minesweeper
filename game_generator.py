@@ -97,21 +97,21 @@ class MinesweeperGUI(QMainWindow):
 
     def end_game(self):
         self.timer.stop()
-        self.games_to_play -= 1  # Decrease the number of remaining games
+        self.games_to_play -= 1
         if self.games_to_play > 0:
-            self.start_new_game()  # Start a new game
+            self.start_new_game()
         else:
-            self.quit_game()  # End the application if no games left
+            self.quit_game()
 
     def start_new_game(self):
-        new_game = Minesweeper(self.rows, self.cols, self.mines)  # Use previously passed rows, cols, and mines
+        new_game = Minesweeper(self.rows, self.cols, self.mines)
         new_ai_player = AIPlayer(new_game)
         self.game = new_game
         self.ai_player = new_ai_player
-        self.logger.start_new_game()  # Start a new logging session
+        self.logger.start_new_game()
         self.results_logger.start_new_game(self.logger.game_id, self.rows, self.cols, self.mines)
-        self.update_board()  # Update the board for the new game
-        self.timer.start(0)  # Restart the AI timer for the new game
+        self.update_board()
+        self.timer.start(0)
 
     def play_ai_move(self):
         try:
@@ -134,23 +134,22 @@ class MinesweeperGUI(QMainWindow):
 
     def quit_game(self):
         print("All games are finished.")
-        self.close()  # Close the application
+        self.close()
 
 
-def run_game(games_to_play=5, rows=10, cols=10, mines=10):  # Now pass rows, cols, and mines to run_game
+def run_game(games_to_play=5, rows=10, cols=10, mines=10):
     try:
         app = QApplication(sys.argv)
         game = Minesweeper(rows, cols, mines)
         ai_player = AIPlayer(game)
-        gui = MinesweeperGUI(game, ai_player, games_to_play, rows, cols, mines)  # Pass them to the GUI
+        gui = MinesweeperGUI(game, ai_player, games_to_play, rows, cols, mines)
         gui.show()
 
-        # Run the game loop
         app.exec_()
-        sys.exit(0)  # Exit after the game finishes
+        sys.exit(0)
 
     except Exception as e:
         print(f"Error in main: {e}")
 
 
-run_game(games_to_play=100, rows=10, cols=10, mines=10)
+run_game(games_to_play=100, rows=10, cols=10, mines=15)

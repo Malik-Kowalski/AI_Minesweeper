@@ -250,14 +250,14 @@ class MinesweeperGUI(QMainWindow):
     def show_game_over(self):
         print("Game Over!")
         QMessageBox.critical(self, "Game Over", "You hit a mine! Game Over.")
-        self.results_logger.finalize_results("Loss")  # Rejestracja przegranej
+        self.results_logger.finalize_results("Loss")
         self.timer.stop()
         self.close()
 
     def show_win_message(self):
         print("Congratulations! You've won the game!")
         QMessageBox.information(self, "Congratulations!", "You've won the game!")
-        self.results_logger.finalize_results("Win")  # Rejestracja wygranej
+        self.results_logger.finalize_results("Win")
         self.timer.stop()
         self.close()
 
