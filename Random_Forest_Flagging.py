@@ -148,7 +148,7 @@ class Random_Forest:
                     else:
                         row_data.append(-3)
                 else:
-                    row_data.append(-3)
+                    row_data.append(-4)
             adjacent_matrix.append(row_data)
         print(f"Macierz dla ({row}, {col}): {adjacent_matrix}")
         return adjacent_matrix

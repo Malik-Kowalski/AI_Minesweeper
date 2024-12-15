@@ -13,8 +13,10 @@ class NeighbourDeduction:
 
                 hidden_neighbours = [n for n in neighbours if not self.game.revealed[n[0]][n[1]]]
                 flagged_neighbours = [n for n in neighbours if self.game.flags[n[0]][n[1]]]
-
+                if len(flagged_neighbours) < mine_count:
+                    continue
                 if len(flagged_neighbours) == mine_count and len(hidden_neighbours) > 0:
+                    print(f"Pole ({row}, {col}) -> miny: {mine_count}, ukryte: {len(hidden_neighbours)}, flagi: {len(flagged_neighbours)}")
                     for n in hidden_neighbours:
                         if not self.game.flags[n[0]][n[1]]:
                             return ('reveal', n[0], n[1])

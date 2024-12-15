@@ -36,7 +36,7 @@ class GameLogger:
                     else:
                         row_data.append(None)
                 else:
-                    row_data.append(None)
+                    row_data.append(-4)
             adjacent_3x3.append(row_data)
         return adjacent_3x3
 
