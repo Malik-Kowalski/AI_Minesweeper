@@ -67,7 +67,6 @@ class Random_Forest:
             return
 
         try:
-            # Obliczanie wag klas na podstawie rozkładu w danych
             class_weights = class_weight.compute_class_weight(
                 class_weight="balanced",
                 classes=np.unique(self.target),
@@ -75,18 +74,15 @@ class Random_Forest:
             )
             class_weights_dict = {i: weight for i, weight in enumerate(class_weights)}
 
-            # Tworzenie modelu z uwzględnieniem wag klas
             self.model = RandomForestClassifier(
                 n_estimators=100,
                 random_state=42,
                 class_weight=class_weights_dict
             )
 
-            # Trenowanie modelu
             self.model.fit(self.features, self.target)
             print("Model został wytrenowany z balansem klas.")
 
-            # Zapisywanie modelu
             self.save_model()
 
         except Exception as e:
