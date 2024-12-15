@@ -1,13 +1,11 @@
 import pandas as pd
 import numpy as np
-from ast import literal_eval
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.utils import class_weight
 import pickle
-from collections import Counter
-
 
 class Random_Forest:
-    def __init__(self, game, model_path="model.pkl", data_path='game_log.csv'):
+    def __init__(self, game, model_path="model.pkl", data_path='game_log_processed_data.csv'):
         self.game = game
         self.model_path = model_path
         self.model = None
@@ -22,67 +20,73 @@ class Random_Forest:
             else:
                 print("Brak ścieżki do danych treningowych. Model nie może być wytrenowany.")
 
-    def preprocess_adjacent(self, matrix_str):
-
-        try:
-            matrix = literal_eval(matrix_str)
-            for i in range(3):
-                for j in range(3):
-                    if matrix[i][j] is None:
-                        matrix[i][j] = -3
-                    elif matrix[i][j] == 'F':
-                        matrix[i][j] = -2
-
-            matrix[1][1] = -3
-
-            return matrix
-        except Exception as e:
-            print(f"Błąd podczas przetwarzania macierzy: {e}")
-            return None
-
     def load_and_preprocess_data(self, file_path):
-
         try:
             data = pd.read_csv(file_path)
             print("Dane wczytane.")
 
-            data['Adjacent3x3'] = data['Adjacent3x3'].apply(self.preprocess_adjacent)
-            data = data.dropna(subset=['Adjacent3x3'])
+            data = self.validate_data(data)
 
-            result_mapping = {'safe': 0, 'win': 0, 'AI_flagged': 1, 'game_over': 1}
-            print("Unikalne wartości w 'Result' przed mapowaniem:", data['Result'].unique())
-            data['Result'] = data['Result'].map(result_mapping)
+            self.features = data.drop(columns=["Label"]).values
+            self.target = data["Label"].values
 
-            print("Rozkład wartości po mapowaniu:")
-            print(data['Result'].value_counts(dropna=False))
-
-            data = data.dropna(subset=['Result'])
-
-            data = data[data['Adjacent3x3'].apply(lambda x: len(x) == 3 and all(len(row) == 3 for row in x))]
-
-            self.features = np.array([np.ravel(matrix) for matrix in data['Adjacent3x3']])
-
-            self.target = data['Result'].values
-
-            print("Rozkład klas w danych treningowych:", Counter(self.target))
             print("Dane przetworzone.")
+
+            unique_classes = np.unique(self.target)
+            print(f"Unikalne klasy w danych: {unique_classes}")
+
+            all_classes = np.arange(np.min(self.target), np.max(self.target) + 1)
+            missing_classes = set(all_classes) - set(unique_classes)
+
+            if missing_classes:
+                print(f"Brakujące klasy: {missing_classes}. Dodawanie ich do danych.")
+                for missing_class in missing_classes:
+                    missing_data = np.zeros((self.target == missing_class).sum(), self.features.shape[1])
+                    missing_target = np.full(missing_data.shape[0], missing_class)
+                    self.features = np.vstack([self.features, missing_data])
+                    self.target = np.hstack([self.target, missing_target])
 
         except Exception as e:
             print(f"Błąd podczas przetwarzania danych: {e}")
             self.features, self.target = None, None
 
-    def train_model(self):
+    def validate_data(self, data):
 
+        data = data.dropna()
+
+        for col in data.columns:
+            if not pd.to_numeric(data[col], errors='coerce').notnull().all():
+                print(f"Kolumna {col} zawiera niepoprawne dane. Usuwam te wiersze.")
+                data = data[pd.to_numeric(data[col], errors='coerce').notnull()]
+
+        return data
+
+    def train_model(self):
         if self.features is None or self.target is None:
             print("Brak przetworzonych danych. Nie można wytrenować modelu.")
             return
 
         try:
-            self.model = RandomForestClassifier(n_estimators=100, random_state=42)
+            # Obliczanie wag klas na podstawie rozkładu w danych
+            class_weights = class_weight.compute_class_weight(
+                class_weight="balanced",
+                classes=np.unique(self.target),
+                y=self.target
+            )
+            class_weights_dict = {i: weight for i, weight in enumerate(class_weights)}
 
+            # Tworzenie modelu z uwzględnieniem wag klas
+            self.model = RandomForestClassifier(
+                n_estimators=100,
+                random_state=42,
+                class_weight=class_weights_dict
+            )
+
+            # Trenowanie modelu
             self.model.fit(self.features, self.target)
-            print("Model został wytrenowany.")
+            print("Model został wytrenowany z balansem klas.")
 
+            # Zapisywanie modelu
             self.save_model()
 
         except Exception as e:
@@ -97,11 +101,10 @@ class Random_Forest:
             print(f"Błąd podczas zapisywania modelu: {e}")
 
     def load_model(self):
-
         try:
             with open(self.model_path, "rb") as file:
                 self.model = pickle.load(file)
-                print("Model Bayesian wczytany.")
+                print("Model wczytany.")
                 return True
         except FileNotFoundError:
             print(f"Plik {self.model_path} nie istnieje. Trzeba wytrenować model.")
@@ -110,42 +113,33 @@ class Random_Forest:
         return False
 
     def predict(self, adjacent_matrix):
-
         if self.model is None:
             print("Model nie został wczytany. Nie można dokonać predykcji.")
             return None
 
         try:
-            processed_matrix = self.preprocess_adjacent(adjacent_matrix)
-            if processed_matrix is None:
-                print("Błędna macierz wejściowa.")
-                return None
+            flat_matrix = np.ravel(adjacent_matrix).reshape(1, -1)
+            prediction_proba = self.model.predict_proba(flat_matrix)
+            return prediction_proba[0][1]
 
-            flat_matrix = np.ravel(processed_matrix).reshape(1, -1)
-            prediction = self.model.predict(flat_matrix)
-            return prediction[0]
         except Exception as e:
             print(f"Błąd podczas predykcji: {e}")
             return None
 
     def predict_game_state(self, game):
-
         flagged_fields = []
         for row in range(game.rows):
             for col in range(game.cols):
                 if not game.revealed[row][col] and not game.flags[row][col]:
                     adjacent_matrix = self.get_adjacent_3x3(game, row, col)
                     if adjacent_matrix is not None:
-                        matrix_str = str(adjacent_matrix)
-                        print(f"Przewidywanie dla pola ({row}, {col}) z danymi: {matrix_str}")
-                        prob_flagging = self.predict(matrix_str)
+                        prob_flagging = self.predict(adjacent_matrix)
                         print(f"Prawdopodobieństwo flagowania dla ({row}, {col}): {prob_flagging}")
                         flagged_fields.append((row, col, prob_flagging))
 
         return flagged_fields
 
     def get_adjacent_3x3(self, game, row, col):
-
         adjacent_matrix = []
         for i in range(row - 1, row + 2):
             row_data = []
@@ -164,15 +158,30 @@ class Random_Forest:
         return adjacent_matrix
 
     def find_flag(self):
-
         flagged_fields = self.predict_game_state(self.game)
         if flagged_fields:
-            flagged_fields = [(row, col, prob) for row, col, prob in flagged_fields if prob > 0.5]
+            flagged_fields = [(row, col, prob) for row, col, prob in flagged_fields if prob > 0.7]
 
             if flagged_fields:
-                flagged_fields.sort(key=lambda x: x[2], reverse=True)
-                row, col, prob = flagged_fields[0]
-                print(f"Pole ({row}, {col}) prawdopodobieństwo: {prob:.2f}")
+                for idx, (row, col, prob) in enumerate(flagged_fields):
+                    discovered_neighbors = self.count_discovered_neighbors(row, col)
+                    flagged_fields[idx] = (row, col, prob, discovered_neighbors)
+
+                flagged_fields.sort(key=lambda x: (x[2], x[3]), reverse=True)
+
+                row, col, prob, discovered_neighbors = flagged_fields[0]
+                print(
+                    f"Pole ({row}, {col}) z {discovered_neighbors} odkrytymi sąsiednimi polami ma prawdopodobieństwo: {prob:.2f}")
                 return row, col, prob
         return None
+
+    def count_discovered_neighbors(self, row, col):
+
+        discovered_neighbors = 0
+        for i in range(row - 1, row + 2):
+            for j in range(col - 1, col + 2):
+                if 0 <= i < self.game.rows and 0 <= j < self.game.cols:
+                    if self.game.revealed[i][j]:
+                        discovered_neighbors += 1
+        return discovered_neighbors
 
