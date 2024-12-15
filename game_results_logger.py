@@ -22,6 +22,7 @@ class GameResultsLogger:
         self.ensure_file_exists()
 
     def ensure_file_exists(self):
+        # Sprawdzamy, czy plik istnieje. Jeśli nie, tworzymy go z odpowiednimi nagłówkami.
         if not os.path.isfile(self.filename):
             columns = [
                 'GameID', 'Mines', 'BoardSize', 'TotalMoves',
@@ -40,14 +41,21 @@ class GameResultsLogger:
                 print(f"Błąd podczas tworzenia pliku Excel: {e}")
 
     def start_new_game(self, game_id, rows, cols, mines):
+        # Inicjalizacja wyników dla nowej gry
         self.current_game = game_id
         self.results['GameID'] = game_id
         self.results['Mines'] = mines
         self.results['BoardSize'] = f"{rows}x{cols}"
+        self.results['TotalMoves'] = 0
+        self.results['NeighbourDeductionMoves'] = 0
+        self.results['ClusterInferenceMoves'] = 0
+        self.results['RandomForestMoves'] = 0
+        self.results['MonteCarloMoves'] = 0
 
     def log_move(self, algorithm):
+        # Logowanie ruchu w grze
         self.results['TotalMoves'] += 1
-        self.results['LastAlgorithm'] = algorithm
+        self.results['LastAlgorithm'] = algorithm  # Rejestracja ostatniego algorytmu
         if algorithm == "Neighbour Deduction":
             self.results['NeighbourDeductionMoves'] += 1
         elif algorithm == "Cluster Inference":
@@ -58,6 +66,7 @@ class GameResultsLogger:
             self.results['MonteCarloMoves'] += 1
 
     def finalize_results(self, result):
+        # Finalizacja wyników gry
         self.results['Result'] = result
         if self.results['TotalMoves'] > 0:
             self.results['NeighbourDeductionPercentage'] = (self.results['NeighbourDeductionMoves'] / self.results['TotalMoves']) * 100
@@ -110,12 +119,8 @@ class GameResultsLogger:
             ws['S6'] = '=COUNTIFS(M:M,"Loss",N:N,"Random Forest")'
             ws['T6'] = '=COUNTIFS(M:M,"Loss",N:N,"Monte Carlo")'
             ws['T7'] = '=COUNTIFS(M:M,"Loss",N:N,"Monte Carlo",D:D,"1")'
+
             wb.save(self.filename)
             print("Formuły zostały dodane do pliku Excel.")
         except Exception as e:
             print(f"Błąd podczas dodawania formuł do Excela: {e}")
-
-
-logger = GameResultsLogger()
-
-#
