@@ -92,12 +92,24 @@ class GameResultsLogger:
             ws = wb.active
 
             ws['O2'] = '=COUNTIF(M:M,"win")'
+            ws['O3'] = '=O2/Q4'
             ws['P2'] = '=COUNTIF(M:M,"loss")'
+            ws['P3'] = '=P2/Q4'
             ws['Q2'] = '=AVERAGE(I:I)'
+            ws['Q3'] = 'Total Games'
+            ws['Q4'] = '=O2+P2'
             ws['R2'] = '=AVERAGE(J:J)'
             ws['S2'] = '=AVERAGE(K:K)'
             ws['T2'] = '=AVERAGE(L:L)'
-
+            ws['Q5'] = 'Neighbour Deduction Lost Games'
+            ws['R5'] = 'Cluster Inference Lost Games'
+            ws['S5'] = 'Random Forest Lost Games'
+            ws['T5'] = 'Monte Carlo Lost Games'
+            ws['Q6'] = '=COUNTIFS(M:M,"Loss",N:N,"Neighbour Deduction")'
+            ws['R6'] = '=COUNTIFS(M:M,"Loss",N:N,"Cluster Inference")'
+            ws['S6'] = '=COUNTIFS(M:M,"Loss",N:N,"Random Forest")'
+            ws['T6'] = '=COUNTIFS(M:M,"Loss",N:N,"Monte Carlo")'
+            ws['T7'] = '=COUNTIFS(M:M,"Loss",N:N,"Monte Carlo",D:D,"1")'
             wb.save(self.filename)
             print("Formuły zostały dodane do pliku Excel.")
         except Exception as e:
@@ -106,3 +118,4 @@ class GameResultsLogger:
 
 logger = GameResultsLogger()
 
+#
