@@ -22,7 +22,6 @@ class GameResultsLogger:
         self.ensure_file_exists()
 
     def ensure_file_exists(self):
-        # Sprawdzamy, czy plik istnieje. Jeśli nie, tworzymy go z odpowiednimi nagłówkami.
         if not os.path.isfile(self.filename):
             columns = [
                 'GameID', 'Mines', 'BoardSize', 'TotalMoves',
@@ -41,7 +40,6 @@ class GameResultsLogger:
                 print(f"Błąd podczas tworzenia pliku Excel: {e}")
 
     def start_new_game(self, game_id, rows, cols, mines):
-        # Inicjalizacja wyników dla nowej gry
         self.current_game = game_id
         self.results['GameID'] = game_id
         self.results['Mines'] = mines
@@ -53,9 +51,8 @@ class GameResultsLogger:
         self.results['MonteCarloMoves'] = 0
 
     def log_move(self, algorithm):
-        # Logowanie ruchu w grze
         self.results['TotalMoves'] += 1
-        self.results['LastAlgorithm'] = algorithm  # Rejestracja ostatniego algorytmu
+        self.results['LastAlgorithm'] = algorithm
         if algorithm == "Neighbour Deduction":
             self.results['NeighbourDeductionMoves'] += 1
         elif algorithm == "Cluster Inference":
@@ -66,7 +63,6 @@ class GameResultsLogger:
             self.results['MonteCarloMoves'] += 1
 
     def finalize_results(self, result):
-        # Finalizacja wyników gry
         self.results['Result'] = result
         if self.results['TotalMoves'] > 0:
             self.results['NeighbourDeductionPercentage'] = (self.results['NeighbourDeductionMoves'] / self.results['TotalMoves']) * 100

@@ -6,7 +6,7 @@ from ai_player import AIPlayer
 from GameLogger import GameLogger
 from game_results_logger import GameResultsLogger
 
-class MinesweeperGUI(QMainWindow):
+class GameGeneratorMinesweeperGUI(QMainWindow):
     def __init__(self, game, ai_player, games_to_play, rows, cols, mines):
         super().__init__()
         self.game = game
@@ -14,7 +14,7 @@ class MinesweeperGUI(QMainWindow):
         self.logger = GameLogger("game_log.csv")
         self.results_logger = GameResultsLogger("game_results.xlsx")
         self.logger.start_new_game()
-        self.games_to_play = games_to_play  # Now tracking number of games to play
+        self.games_to_play = games_to_play
         self.rows = rows
         self.cols = cols
         self.mines = mines
@@ -87,12 +87,12 @@ class MinesweeperGUI(QMainWindow):
 
     def show_game_over(self):
         print("Game Over!")
-        self.results_logger.finalize_results("Loss")  # Rejestracja przegranej
+        self.results_logger.finalize_results("Loss")
         self.end_game()
 
     def show_win_message(self):
         print("Congratulations! You've won the game!")
-        self.results_logger.finalize_results("Win")  # Rejestracja wygranej
+        self.results_logger.finalize_results("Win")
         self.end_game()
 
     def end_game(self):
@@ -142,7 +142,7 @@ def run_game(games_to_play=5, rows=10, cols=10, mines=10):
         app = QApplication(sys.argv)
         game = Minesweeper(rows, cols, mines)
         ai_player = AIPlayer(game)
-        gui = MinesweeperGUI(game, ai_player, games_to_play, rows, cols, mines)
+        gui = GameGeneratorMinesweeperGUI(game, ai_player, games_to_play, rows, cols, mines)
         gui.show()
 
         app.exec_()
@@ -152,4 +152,4 @@ def run_game(games_to_play=5, rows=10, cols=10, mines=10):
         print(f"Error in main: {e}")
 
 
-run_game(games_to_play=100, rows=10, cols=10, mines=15)
+run_game(games_to_play=99, rows=10, cols=10, mines=10)
