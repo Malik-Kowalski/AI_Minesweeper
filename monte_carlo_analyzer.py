@@ -3,20 +3,18 @@ from collections import defaultdict
 
 class MonteCarloAnalyzer:
     def __init__(self, game):
-
         self.game = game
 
     def analyze(self, iterations=1000):
-
         scores = defaultdict(int)
 
         for _ in range(iterations):
-            simulated_board = self.simulate_board()
+            simulated_board = self._simulate_board()
 
             for row in range(self.game.rows):
                 for col in range(self.game.cols):
                     if not self.game.revealed[row][col] and not self.game.flags[row][col]:
-                        if simulated_board[row][col] == -1:  # Pole z miną
+                        if simulated_board[row][col] == -1:
                             scores[(row, col)] += 1
 
         min_risk = float('inf')
@@ -33,8 +31,7 @@ class MonteCarloAnalyzer:
 
         return best_move
 
-    def simulate_board(self):
-
+    def _simulate_board(self):
         simulated_board = [[0 for _ in range(self.game.cols)] for _ in range(self.game.rows)]
 
         for row in range(self.game.rows):

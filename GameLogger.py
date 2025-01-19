@@ -6,9 +6,9 @@ class GameLogger:
     def __init__(self, filename="game_log.csv"):
         self.filename = filename
         self.game_id = self.get_last_game_id()
-        self.ensure_file_exists()
+        self._ensure_file_exists()
 
-    def ensure_file_exists(self):
+    def _ensure_file_exists(self):
         if not os.path.isfile(self.filename):
             columns = ['GameID', 'Action', 'Row', 'Col', 'Result', 'Adjacent3x3']
             pd.DataFrame(columns=columns).to_csv(self.filename, index=False)
@@ -23,7 +23,7 @@ class GameLogger:
     def start_new_game(self):
         self.game_id += 1
 
-    def get_adjacent_3x3(self, game, row, col):
+    def _get_adjacent_3x3(self, game, row, col):
         adjacent_3x3 = []
         for r in range(row - 1, row + 2):
             row_data = []
@@ -41,7 +41,7 @@ class GameLogger:
         return adjacent_3x3
 
     def log_move(self, action, row, col, result, game):
-        adjacent_3x3 = self.get_adjacent_3x3(game, row, col)
+        adjacent_3x3 = self._get_adjacent_3x3(game, row, col)
 
         move_data = pd.DataFrame({
             'GameID': [self.game_id],

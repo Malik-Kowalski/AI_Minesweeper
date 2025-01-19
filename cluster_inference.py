@@ -24,22 +24,22 @@ class ClusterInference:
             visited.add((r, c))
             cluster.append((r, c))
 
-            neighbours = self.get_neighbours(r, c)
+            neighbours = self._get_neighbours(r, c)
             for n_r, n_c in neighbours:
                 if not self.game.revealed[n_r][n_c] and (n_r, n_c) not in visited:
                     queue.append((n_r, n_c))
         return cluster
 
-    def get_neighbours(self, row, col):
+    def _get_neighbours(self, row, col):
         neighbours = []
         for r in range(row - 1, row + 2):
             for c in range(col - 1, col + 2):
-                if (r == row and c == col) or not self.is_valid(r, c):
+                if (r == row and c == col) or not self._is_valid(r, c):
                     continue
                 neighbours.append((r, c))
         return neighbours
 
-    def is_valid(self, row, col):
+    def _is_valid(self, row, col):
         return 0 <= row < self.game.rows and 0 <= col < self.game.cols
 
     def analyze_clusters(self):
@@ -56,7 +56,7 @@ class ClusterInference:
 
     def _analyze_cell(self, cell):
         row, col = cell
-        neighbours = self.get_neighbours(row, col)
+        neighbours = self._get_neighbours(row, col)
 
         mine_count = sum(1 for r, c in neighbours if self.game.board[r][c] == -1)
         flagged_count = sum(1 for r, c in neighbours if self.game.flags[r][c])

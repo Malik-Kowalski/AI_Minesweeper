@@ -1,4 +1,5 @@
 import random
+
 class Minesweeper:
     def __init__(self, rows, cols, mines):
         self.rows = rows
@@ -27,7 +28,7 @@ class Minesweeper:
             return "game_over"
         elif self.board[row][col] == 0:
             self._reveal_neighbors(row, col)
-        if self.check_win():
+        if self._check_win():
             return "win"
         return "safe"
 
@@ -41,7 +42,7 @@ class Minesweeper:
                 if 0 <= r < self.rows and 0 <= c < self.cols and not self.revealed[r][c]:
                     self.reveal(r, c)
 
-    def check_win(self):
+    def _check_win(self):
         for row in range(self.rows):
             for col in range(self.cols):
                 if self.board[row][col] != -1 and not self.revealed[row][col]:
@@ -59,4 +60,3 @@ class Minesweeper:
                         if 0 <= r < self.rows and 0 <= c < self.cols and self.board[r][c] == -1:
                             mine_count += 1
                 self.board[row][col] = mine_count
-
