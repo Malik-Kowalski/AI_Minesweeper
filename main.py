@@ -31,6 +31,7 @@ class StartWindow(QMainWindow):
         size_layout.addWidget(size_label)
         size_layout.addWidget(self._size_combo)
         layout.addLayout(size_layout)
+
         mines_layout = QHBoxLayout()
         mines_label = QLabel("Mines:")
         self._mines_spinbox = QSpinBox()
@@ -78,7 +79,7 @@ class StartWindow(QMainWindow):
 class MinesweeperGUI(QMainWindow):
     def __init__(self, game, ai_player, delay):
         super().__init__()
-        self._game = game
+        self.game = self.game = game
         self._ai_player = ai_player
         self._logger = GameLogger("game_log.csv")
         self._results_logger = GameResultsLogger("game_results.xlsx")
@@ -113,8 +114,8 @@ class MinesweeperGUI(QMainWindow):
         game_layout.addLayout(self._grid)
         self._buttons = {}
 
-        for row in range(self._game.rows):
-            for col in range(self._game.cols):
+        for row in range(self.game.rows):
+            for col in range(self.game.cols):
                 button = QPushButton(" ")
                 button.setFixedSize(30, 30)
                 button.setStyleSheet("background-color: gray;")
@@ -137,8 +138,8 @@ class MinesweeperGUI(QMainWindow):
     def _on_click(self, row, col):
         try:
             self._toggle_highlight(row, col)
-            result = self._game.reveal(row, col)
-            self._logger.log_move("reveal", row, col, result, self._game)
+            result = self.game.reveal(row, col)
+            self._logger.log_move("reveal", row, col, result, self.game)
             self._history_browser.append(f"Revealed: ({row}, {col}) Result: {result}")
             if result == "game_over":
                 self._show_game_over()
@@ -152,8 +153,8 @@ class MinesweeperGUI(QMainWindow):
     def _on_right_click(self, row, col):
         try:
             self._toggle_highlight(row, col)
-            self._game.flag(row, col)
-            self._logger.log_move("flag", row, col, "AI_flagged", self._game)
+            self.game.flag(row, col)
+            self._logger.log_move("flag", row, col, "AI_flagged", self.game)
             self._history_browser.append(f"Flagged: ({row}, {col})")
             self._update_board()
         except Exception as e:
@@ -168,18 +169,18 @@ class MinesweeperGUI(QMainWindow):
 
     def _update_board(self):
         try:
-            for row in range(self._game.rows):
-                for col in range(self._game.cols):
+            for row in range(self.game.rows):
+                for col in range(self.game.cols):
                     button = self._buttons[(row, col)]
-                    if self._game.flags[row][col]:
+                    if self.game.flags[row][col]:
                         button.setText("F")
                         button.setStyleSheet("color: red; background-color: gray; font-weight: bold;")
-                    elif self._game.revealed[row][col]:
-                        if self._game.board[row][col] == -1:
+                    elif self.game.revealed[row][col]:
+                        if self.game.board[row][col] == -1:
                             button.setText("*")
                             button.setStyleSheet("color: black; background-color: darkgray; font-weight: bold;")
                         else:
-                            number = self._game.board[row][col]
+                            number = self.game.board[row][col]
                             button.setText(str(number) if number > 0 else " ")
                             color = self._get_number_color(number)
                             button.setStyleSheet(f"color: {color}; background-color: darkgray; font-weight: bold;")
@@ -196,10 +197,10 @@ class MinesweeperGUI(QMainWindow):
             print(f"Error in update_board: {e}")
 
     def _get_original_color(self, row, col):
-        if self._game.flags[row][col]:
+        if self.game.flags[row][col]:
             return "red"
-        if self._game.revealed[row][col]:
-            value = self._game.board[row][col]
+        if self.game.revealed[row][col]:
+            value = self.game.board[row][col]
             if value == -1:
                 return "black"
             return self._get_number_color(value)
