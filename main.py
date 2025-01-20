@@ -10,7 +10,7 @@ from GameLogger import GameLogger
 from game_results_logger import GameResultsLogger
 
 
-class StartWindow(QMainWindow):
+class StartWindow(QMainWindow): 
     def __init__(self):
         super().__init__()
         self._initUI()
