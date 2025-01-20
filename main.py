@@ -79,7 +79,7 @@ class StartWindow(QMainWindow):
 class MinesweeperGUI(QMainWindow):
     def __init__(self, game, ai_player, delay):
         super().__init__()
-        self.game = self.game = game
+        self.game = game
         self._ai_player = ai_player
         self._logger = GameLogger("game_log.csv")
         self._results_logger = GameResultsLogger("game_results.xlsx")

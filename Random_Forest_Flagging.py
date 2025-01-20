@@ -82,7 +82,7 @@ class Random_Forest:
             self._model.fit(self._features, self._target)
             print("Model został wytrenowany z balansem klas.")
 
-            self._save_model()  # Prywatne
+            self._save_model()
 
         except Exception as e:
             print(f"Błąd podczas trenowania modelu: {e}")
@@ -159,18 +159,16 @@ class Random_Forest:
 
             if flagged_fields:
                 for idx, (row, col, prob) in enumerate(flagged_fields):
-                    discovered_neighbors = self.count_discovered_neighbors(row, col)
+                    discovered_neighbors = self._count_discovered_neighbors(row, col)
                     flagged_fields[idx] = (row, col, prob, discovered_neighbors)
 
                 flagged_fields.sort(key=lambda x: (x[2], x[3]), reverse=True)
 
                 row, col, prob, discovered_neighbors = flagged_fields[0]
-                print(
-                    f"Pole ({row}, {col}) z {discovered_neighbors} odkrytymi sąsiednimi polami ma prawdopodobieństwo: {prob:.2f}")
                 return row, col, prob
         return None
 
-    def count_discovered_neighbors(self, row, col):
+    def _count_discovered_neighbors(self, row, col):
         discovered_neighbors = 0
         for i in range(row - 1, row + 2):
             for j in range(col - 1, col + 2):

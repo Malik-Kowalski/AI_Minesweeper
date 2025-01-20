@@ -149,4 +149,4 @@ def run_game(games_to_play=5, rows=10, cols=10, mines=10):
         print(f"Error in main: {e}")
 
 
-run_game(games_to_play=10, rows=10, cols=10, mines=10)
+run_game(games_to_play=98, rows=25, cols=40, mines=100)
